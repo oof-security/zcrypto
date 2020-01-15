@@ -24,8 +24,11 @@ type TLSVersion uint16
 
 type CipherSuite uint16
 
+type CertificateType uint16
+
 type CertificateRequest struct {
-	HasSignatures      bool                `json:"has_signatures"`
+	CertificateTypes         []CertificateType       `json:"certificate_type"`
+	CertificateAuthorities   [][]byte  `json:"cas,omitempty"`
 }
 
 type ClientHello struct {
@@ -521,7 +524,19 @@ func (m *clientKeyExchangeMsg) MakeLog(ka keyAgreement) *ClientKeyExchange {
 
 func (m *certificateRequestMsg) MakeLog() *CertificateRequest {
 	ckx := new(CertificateRequest)
-	
-	ckx.HasSignatures = m.hasSignatureAndHash
+
+	ckx.CertificateTypes = make([]CertificateType, len(m.certificateTypes))
+	for i, certType := range m.certificateTypes {
+		ckx.CertificateTypes[i] = CertificateType(certType)
+	}
+
+	if len(m.certificateAuthorities) > 0 {
+		ckx.CertificateAuthorities = make([][]byte, len(m.certificateAuthorities))
+		for i, ca := range m.certificateAuthorities {
+			tempBytes := make([]byte, len(ca))
+			copy(tempBytes, ca)
+			ckx.CertificateAuthorities[i] = tempBytes
+		}
+	}
 	return ckx
 }
