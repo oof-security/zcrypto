@@ -713,6 +713,7 @@ func (hs *clientHandshakeState) doFullHandshake() error {
 	if ok {
 		certRequested = true
 
+		c.handshakeLog.CertificateRequest = certReq.MakeLog()
 		// RFC 4346 on the certificateAuthorities field:
 		// A list of the distinguished names of acceptable certificate
 		// authorities. These distinguished names may specify a desired

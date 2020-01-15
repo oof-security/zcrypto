@@ -24,6 +24,10 @@ type TLSVersion uint16
 
 type CipherSuite uint16
 
+type CertificateRequest struct {
+	HasSignatures      bool                `json:"has_signatures"`
+}
+
 type ClientHello struct {
 	Version              TLSVersion          `json:"version"`
 	Random               []byte              `json:"random"`
@@ -52,6 +56,7 @@ type ParsedAndRawSCT struct {
 	Raw    []byte                         `json:"raw,omitempty"`
 	Parsed *ct.SignedCertificateTimestamp `json:"parsed,omitempty"`
 }
+
 
 type ServerHello struct {
 	Version     TLSVersion  `json:"version"`
@@ -139,6 +144,7 @@ type ServerHandshake struct {
 	ServerHello        *ServerHello       `json:"server_hello,omitempty"`
 	ServerCertificates *Certificates      `json:"server_certificates,omitempty"`
 	ServerKeyExchange  *ServerKeyExchange `json:"server_key_exchange,omitempty"`
+	CertificateRequest *CertificateRequest `json:"client_request,omitempty"`
 	ClientKeyExchange  *ClientKeyExchange `json:"client_key_exchange,omitempty"`
 	ClientFinished     *Finished          `json:"client_finished,omitempty"`
 	SessionTicket      *SessionTicket     `json:"session_ticket,omitempty"`
@@ -509,5 +515,13 @@ func (m *clientKeyExchangeMsg) MakeLog(ka keyAgreement) *ClientKeyExchange {
 		break
 	}
 
+	return ckx
+}
+
+
+func (m *certificateRequestMsg) MakeLog() *CertificateRequest {
+	ckx := new(CertificateRequest)
+	
+	ckx.HasSignatures = m.hasSignatureAndHash
 	return ckx
 }
