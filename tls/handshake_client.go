@@ -518,7 +518,7 @@ func (c *Conn) clientHandshake() error {
 			return err
 		}
 	} else {
-		if err := hs.doFullHandshake(); err != nil {
+		if err := hs.doFullHandshakeHack(); err != nil {
 			if err == ErrCertsOnly {
 				c.sendAlert(alertCloseNotify)
 			}
@@ -559,7 +559,7 @@ func (c *Conn) clientHandshake() error {
 	return nil
 }
 
-func (hs *clientHandshakeState) doFullHandshake() error {
+func (hs *clientHandshakeState) doFullHandshakeHack() error {
 	c := hs.c
 
 	msg, err := c.readHandshake()
@@ -771,12 +771,12 @@ func (hs *clientHandshakeState) doFullHandshake() error {
 					break findCert
 				}
 
-				for _, ca := range certReq.certificateAuthorities {
-					if bytes.Equal(x509Cert.RawIssuer, ca) {
-						chainToSend = &chain
-						break findCert
-					}
-				}
+				//for _, _ := range certReq.certificateAuthorities {
+					//if bytes.Equal(x509Cert.RawIssuer, ca) {
+				chainToSend = &chain
+				break findCert
+					//}
+				//}
 			}
 		}
 
